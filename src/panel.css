@@ -1,0 +1,48 @@
+html, body, #root { height: 100%; margin: 0; overflow: hidden; }
+.orca-panel { height: 100%; min-width: 0; display: flex; flex-direction: column; font: 14px/20px ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; letter-spacing: .01em; color: var(--foreground); background: var(--background); }
+.orca-panel * { box-sizing: border-box; }
+.orca-panel button, .orca-panel select { font: inherit; color: inherit; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; min-height: 32px; }
+.orca-panel select { appearance: none; -webkit-appearance: none; padding-inline-end: 38px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23909090' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: 16px 16px; background-position: right 12px center; }
+.orca-panel button { cursor: pointer; }
+.orca-panel button:hover, .orca-panel button[aria-pressed=true] { background: var(--accent); }
+.orca-panel button:focus-visible, .orca-panel select:focus-visible, .orca-panel pre:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.viewer-header, .viewer-toolbar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
+.viewer-header strong { font-size: 14px; font-weight: 600; }
+.viewer-context { flex: 1; min-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted-foreground); }
+.viewer-tabs { display: flex; gap: 4px; }
+.viewer-model-meta { color: var(--muted-foreground); margin-left: auto; font-size: 12px; }
+.viewer-empty { margin: auto; padding: 32px; max-width: 620px; }
+.viewer-empty h2 { font-size: 18px; font-weight: 500; }
+.viewer-empty p, .viewer-note { color: var(--muted-foreground); }
+.viewer-note { padding: 6px 16px; font-size: 12px; border-top: 1px solid var(--border); }
+.viewer-json { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 20px; font: 14px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; user-select: text; }
+.orca-panel .diagram-container { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.orca-panel .diagram-controls { display: flex; gap: 6px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--border); }
+.orca-panel .diagram-controls span { min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; }
+.orca-panel .diagram-scroll { position: relative; flex: 1; min-height: 0; overflow: auto; padding: 0; overscroll-behavior: contain; }
+.orca-panel .mermaid-view { display: block; transform: none; transform-origin: top left; user-select: none; }
+.orca-panel .mermaid-view svg { display: block; max-width: none; }
+.orca-panel .diagram-error { padding: 20px; white-space: pre-wrap; }
+.viewer-workspace { display: flex; flex: 1; min-height: 0; min-width: 0; }
+.orca-panel .diagram-container { min-width: 0; }
+.viewer-inspector { width: 280px; max-width: 42%; flex-shrink: 0; padding: 12px; overflow: hidden; border-left: 1px solid var(--border); background: var(--card); display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.viewer-inspector-heading { display: flex; align-items: center; justify-content: space-between; }
+.viewer-inspector h3 { font-size: 16px; font-weight: 500; overflow-wrap: anywhere; }
+.viewer-inspector p, .viewer-inspector dt { color: var(--muted-foreground); }
+.viewer-inspector dl { margin: 16px 0; }
+.viewer-inspector dt { font-size: 12px; }
+.viewer-inspector dd { margin: 4px 0 12px; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+.viewer-inspector-heading { flex-shrink: 0; }
+.viewer-element-list { display: flex; flex-direction: column; gap: 2px; overflow: auto; flex: 1 1 45%; min-height: 72px; }
+.orca-panel .viewer-element-list button { flex-shrink: 0; text-align: left; border-color: transparent; background: transparent; border-radius: 4px; color: var(--foreground); overflow-wrap: anywhere; }
+.orca-panel .viewer-element-list button:hover { text-decoration: underline; background: var(--accent); }
+.orca-panel .viewer-element-list button[aria-pressed=true] { background: var(--accent); box-shadow: inset 3px 0 var(--primary); }
+.viewer-element-detail { flex: 1 1 55%; min-height: 0; overflow: auto; border-top: 1px solid var(--border); }
+.orca-panel .viewer-inspector-toggle, .viewer-inspector-heading button { display: inline-flex; align-items: center; justify-content: center; width: 32px; padding: 5px; flex-shrink: 0; }
+.orca-panel .mermaid-view [data-selected=true] { outline: 2px solid #2563eb; outline-offset: 3px; }
+html.dark { color-scheme: dark; }
+html.light { color-scheme: light; }
+.orca-panel .viewer-json { min-width: 0; }
+.orca-panel .diagram-scroll:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; }
+.orca-panel .diagram-controls select { min-width: 88px; font-variant-numeric: tabular-nums; }
+.orca-panel .diagram-controls { flex-wrap: wrap; flex-shrink: 0; }

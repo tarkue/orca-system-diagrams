@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+import {build} from 'esbuild';
+import {readFile,writeFile,mkdir,copyFile,stat,rm} from 'node:fs/promises';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {readViewerModel,viewerModelScript,writeAtomic} from '../orca-plugin/model-input.mjs';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const out=resolve(root,'orca-plugin/package');
+if(process.argv.includes('--help')){console.log('node scripts/build-plugin.mjs\nValidates orca-plugin/model.json and bundles the read-only viewer with inline model/script/CSS. No HTTP server.\nDoes not install, enable or change Orca. Review README install/consent section.');process.exit(0);}
+if(process.argv.length>2)throw Error('Unknown argument; use --help');
+const {model,hash:modelHash}=await readViewerModel();
+const result=await build({entryPoints:[resolve(root,'src/orca-panel.tsx')],absWorkingDir:root,bundle:true,write:false,outfile:'panel.js',format:'iife',platform:'browser',target:'chrome130',minify:true,legalComments:'inline',jsx:'automatic',define:{'process.env.NODE_ENV':'"production"'},loader:{'.woff2':'dataurl','.woff':'dataurl','.ttf':'dataurl','.eot':'dataurl','.svg':'dataurl','.png':'dataurl'},metafile:true});
+const scripts=result.outputFiles.filter(file=>file.path.endsWith('.js'));
+const css=result.outputFiles.filter(file=>file.path.endsWith('.css')).map(file=>file.text).join('\n');
+if(scripts.length!==1)throw Error('Expected one self-contained JavaScript bundle');
+const javascript=scripts[0].text.replace(/<\/script/gi,'<\\/script');
+const html=`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Схемы системы</title><style>${css.replace(/<\/style/gi,'<\\/style')}</style></head><body><div id="root"></div><script>${viewerModelScript(model)}${javascript}</script></body></html>`;
+if(Buffer.byteLength(html)>10*1024*1024)throw Error('Panel exceeds installed Orca 10MiB entry limit');
+if(/<script[^>]+src=|<link[^>]+href=/i.test(html))throw Error('Panel contains external assets');
+await mkdir(out,{recursive:true});
+await writeAtomic(resolve(out,'panel.html'),html);
+await writeAtomic(resolve(out,'orca-plugin.json'),await readFile(resolve(root,'orca-plugin/orca-plugin.json')));
+await rm(resolve(out,'worker.mjs'),{force:true});
+await copyFile(resolve(root,'THIRD_PARTY_NOTICES.md'),resolve(out,'THIRD_PARTY_NOTICES.md'));
+await writeAtomic(resolve(out,'bundle-meta.json'),JSON.stringify({source:'src/orca-panel.tsx',networkRequired:false,viewerModel:{path:'orca-plugin/model.json',id:model.id,version:model.version,sha256:modelHash},compatibilityTarget:{orca:'1.4.218',pluginApi:1},bundleBytes:Buffer.byteLength(html),inputs:Object.keys(result.metafile.inputs)},null,2));
+const reviewFiles=['orca-plugin.json','panel.html','THIRD_PARTY_NOTICES.md','bundle-meta.json'];
+const checksums=[];
+for(const file of reviewFiles)checksums.push(createHash('sha256').update(await readFile(resolve(out,file))).digest('hex')+'  '+file);
+await writeAtomic(resolve(out,'SHA256SUMS'),checksums.join('\n')+'\n');
+console.log(`Native Orca plugin package: ${out}\npanel.html: ${(await stat(resolve(out,'panel.html'))).size} bytes\nNo installation performed.`);

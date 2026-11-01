@@ -1,0 +1,370 @@
+{
+  "id": "support",
+  "name": "Эскалация поддержки",
+  "description": "Обращение классифицируется по стоимости влияния; руководитель разрешает дорогую эскалацию, инженер устраняет инцидент.",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "customer",
+      "name": "Клиент",
+      "kind": "person",
+      "description": "Инициирует запрос и получает результат",
+      "technology": "Web browser"
+    },
+    {
+      "id": "reviewer",
+      "name": "Руководитель поддержки",
+      "kind": "person",
+      "description": "Принимает решение по запросам выше порога",
+      "technology": "Рабочее место оператора"
+    },
+    {
+      "id": "api",
+      "name": "Маршрутизатор обращений",
+      "kind": "service",
+      "description": "Обращение классифицируется по стоимости влияния; руководитель разрешает дорогую эскалацию, инженер устраняет инцидент.",
+      "technology": "Python / FastAPI"
+    },
+    {
+      "id": "db",
+      "name": "Хранилище эскалация поддержки",
+      "kind": "database",
+      "description": "Данные и журнал решений",
+      "technology": "PostgreSQL"
+    },
+    {
+      "id": "external",
+      "name": "Дежурная инженерная команда",
+      "kind": "external",
+      "description": "Выполняет подтверждённую операцию",
+      "technology": "HTTPS API"
+    }
+  ],
+  "relations": [
+    {
+      "id": "r1",
+      "from": "customer",
+      "to": "api",
+      "label": "Получено обращение"
+    },
+    {
+      "id": "r2",
+      "from": "api",
+      "to": "db",
+      "label": "Сохранить запрос и аудит"
+    },
+    {
+      "id": "r3",
+      "from": "api",
+      "to": "reviewer",
+      "label": "Подтвердить эскалацию"
+    },
+    {
+      "id": "r4",
+      "from": "reviewer",
+      "to": "api",
+      "label": "Решение и комментарий"
+    },
+    {
+      "id": "r5",
+      "from": "api",
+      "to": "external",
+      "label": "Передать инженеру и устранить"
+    }
+  ],
+  "workflow": {
+    "steps": [
+      {
+        "id": "start",
+        "name": "Получено обращение",
+        "kind": "start",
+        "actor": "customer"
+      },
+      {
+        "id": "validate",
+        "name": "Оценить влияние и SLA",
+        "kind": "task",
+        "actor": "api"
+      },
+      {
+        "id": "threshold",
+        "name": "Влияние превышает лимит?",
+        "kind": "decision",
+        "actor": "api"
+      },
+      {
+        "id": "approval",
+        "name": "Подтвердить эскалацию",
+        "kind": "decision",
+        "actor": "reviewer"
+      },
+      {
+        "id": "execute",
+        "name": "Передать инженеру и устранить",
+        "kind": "task",
+        "actor": "api"
+      },
+      {
+        "id": "decline",
+        "name": "Вернуть на первую линию",
+        "kind": "task",
+        "actor": "api"
+      },
+      {
+        "id": "completed",
+        "name": "Инцидент устранён",
+        "kind": "end",
+        "actor": "api"
+      },
+      {
+        "id": "rejected",
+        "name": "Эскалация отклонена",
+        "kind": "end",
+        "actor": "api"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "from": "start",
+        "to": "validate",
+        "condition": "always"
+      },
+      {
+        "id": "e2",
+        "from": "validate",
+        "to": "threshold",
+        "condition": "always"
+      },
+      {
+        "id": "e3",
+        "from": "threshold",
+        "to": "approval",
+        "condition": "above_threshold",
+        "label": "> 50000 RUB impact; согласование включено"
+      },
+      {
+        "id": "e4",
+        "from": "threshold",
+        "to": "execute",
+        "condition": "below_threshold",
+        "label": "≤ 50000 RUB impact или без согласования"
+      },
+      {
+        "id": "e5",
+        "from": "approval",
+        "to": "execute",
+        "condition": "approved",
+        "label": "Одобрено"
+      },
+      {
+        "id": "e6",
+        "from": "approval",
+        "to": "decline",
+        "condition": "rejected",
+        "label": "Отклонено"
+      },
+      {
+        "id": "e7",
+        "from": "execute",
+        "to": "completed",
+        "condition": "always"
+      },
+      {
+        "id": "e8",
+        "from": "decline",
+        "to": "rejected",
+        "condition": "always"
+      }
+    ]
+  },
+  "entities": [
+    {
+      "id": "entity0",
+      "name": "Клиент",
+      "fields": [
+        {
+          "name": "customer_id",
+          "type": "string",
+          "key": true
+        },
+        {
+          "name": "company",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "service_tier",
+          "type": "string",
+          "key": false
+        }
+      ]
+    },
+    {
+      "id": "entity1",
+      "name": "Обращение",
+      "fields": [
+        {
+          "name": "ticket_id",
+          "type": "string",
+          "key": true
+        },
+        {
+          "name": "customer_id",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "impact",
+          "type": "decimal",
+          "key": false
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "sla_deadline",
+          "type": "datetime",
+          "key": false
+        }
+      ]
+    },
+    {
+      "id": "entity2",
+      "name": "Эскалация",
+      "fields": [
+        {
+          "name": "escalation_id",
+          "type": "string",
+          "key": true
+        },
+        {
+          "name": "ticket_id",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "engineer",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "resolution",
+          "type": "string",
+          "key": false
+        }
+      ]
+    }
+  ],
+  "entityRelations": [
+    {
+      "from": "entity0",
+      "to": "entity1",
+      "label": "содержит",
+      "cardinality": "one-to-many"
+    },
+    {
+      "from": "entity1",
+      "to": "entity2",
+      "label": "исполняется через",
+      "cardinality": "one-to-many"
+    }
+  ],
+  "states": [
+    {
+      "id": "start",
+      "name": "Получено обращение"
+    },
+    {
+      "id": "validate",
+      "name": "Оценить влияние и SLA"
+    },
+    {
+      "id": "threshold",
+      "name": "Влияние превышает лимит?"
+    },
+    {
+      "id": "approval",
+      "name": "Подтвердить эскалацию"
+    },
+    {
+      "id": "execute",
+      "name": "Передать инженеру и устранить"
+    },
+    {
+      "id": "decline",
+      "name": "Вернуть на первую линию"
+    },
+    {
+      "id": "completed",
+      "name": "Инцидент устранён"
+    },
+    {
+      "id": "rejected",
+      "name": "Эскалация отклонена"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "start",
+      "to": "validate",
+      "label": "Далее"
+    },
+    {
+      "from": "validate",
+      "to": "threshold",
+      "label": "Далее"
+    },
+    {
+      "from": "threshold",
+      "to": "approval",
+      "label": "> 50000 RUB impact; согласование включено"
+    },
+    {
+      "from": "threshold",
+      "to": "execute",
+      "label": "≤ 50000 RUB impact или без согласования"
+    },
+    {
+      "from": "approval",
+      "to": "execute",
+      "label": "Одобрено"
+    },
+    {
+      "from": "approval",
+      "to": "decline",
+      "label": "Отклонено"
+    },
+    {
+      "from": "execute",
+      "to": "completed",
+      "label": "Далее"
+    },
+    {
+      "from": "decline",
+      "to": "rejected",
+      "label": "Далее"
+    }
+  ],
+  "rules": {
+    "approvalThreshold": 50000,
+    "currency": "RUB impact",
+    "requireApproval": true
+  },
+  "stack": [
+    {
+      "name": "Python / FastAPI",
+      "purpose": "Маршрутизатор обращений"
+    },
+    {
+      "name": "PostgreSQL",
+      "purpose": "Хранение предметных сущностей и аудита"
+    },
+    {
+      "name": "HTTPS API",
+      "purpose": "Дежурная инженерная команда"
+    }
+  ]
+}

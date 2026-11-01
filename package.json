@@ -1,0 +1,41 @@
+{
+  "name": "orca-system-diagrams",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "test": "vitest run && node --test orca-plugin/model-input.test.mjs scripts/package-plugin.test.mjs",
+    "test:bridge": "vitest run --config orca-plugin/vitest.config.ts",
+    "build": "tsc -b && node scripts/build-plugin.mjs",
+    "build:plugin": "node scripts/build-plugin.mjs",
+    "package:plugin": "npm run build && node scripts/package-plugin.mjs",
+    "verify:plugin": "node scripts/verify-plugin.mjs",
+    "build:site": "node scripts/build-site.mjs",
+    "check:publication": "node scripts/check-publication.mjs"
+  },
+  "dependencies": {
+    "bpmn-js": "^18.31.1",
+    "lucide-react": "^0.468.0",
+    "mermaid": "^12.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.19.0",
+    "typescript": "~5.7.2",
+    "vite": "^8.3.5",
+    "vitest": "^4.1.12"
+  },
+  "description": "Native system-diagram viewer for Orca: C4, BPMN, EPC, Sequence, ER and State.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tarkue/orca-system-diagrams.git"
+  },
+  "homepage": "https://tarkue.github.io/orca-system-diagrams/"
+}

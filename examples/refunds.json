@@ -1,0 +1,375 @@
+{
+  "id": "refunds",
+  "name": "Возвраты заказов",
+  "description": "Покупатель запрашивает возврат заказа; финансовый менеджер согласует крупную сумму, платёжный шлюз возвращает деньги.",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "customer",
+      "name": "Покупатель",
+      "kind": "person",
+      "description": "Инициирует запрос и получает результат",
+      "technology": "Web browser"
+    },
+    {
+      "id": "reviewer",
+      "name": "Финансовый менеджер",
+      "kind": "person",
+      "description": "Принимает решение по запросам выше порога",
+      "technology": "Рабочее место оператора"
+    },
+    {
+      "id": "api",
+      "name": "Сервис возвратов",
+      "kind": "service",
+      "description": "Покупатель запрашивает возврат заказа; финансовый менеджер согласует крупную сумму, платёжный шлюз возвращает деньги.",
+      "technology": "TypeScript / Fastify"
+    },
+    {
+      "id": "db",
+      "name": "Хранилище возвраты заказов",
+      "kind": "database",
+      "description": "Данные и журнал решений",
+      "technology": "PostgreSQL"
+    },
+    {
+      "id": "external",
+      "name": "Платёжный шлюз",
+      "kind": "external",
+      "description": "Выполняет подтверждённую операцию",
+      "technology": "HTTPS API"
+    }
+  ],
+  "relations": [
+    {
+      "id": "r1",
+      "from": "customer",
+      "to": "api",
+      "label": "Заявка на возврат"
+    },
+    {
+      "id": "r2",
+      "from": "api",
+      "to": "db",
+      "label": "Сохранить запрос и аудит"
+    },
+    {
+      "id": "r3",
+      "from": "api",
+      "to": "reviewer",
+      "label": "Согласовать возврат"
+    },
+    {
+      "id": "r4",
+      "from": "reviewer",
+      "to": "api",
+      "label": "Решение и комментарий"
+    },
+    {
+      "id": "r5",
+      "from": "api",
+      "to": "external",
+      "label": "Вернуть платёж"
+    }
+  ],
+  "workflow": {
+    "steps": [
+      {
+        "id": "start",
+        "name": "Заявка на возврат",
+        "kind": "start",
+        "actor": "customer"
+      },
+      {
+        "id": "validate",
+        "name": "Проверить заказ и срок возврата",
+        "kind": "task",
+        "actor": "api"
+      },
+      {
+        "id": "threshold",
+        "name": "Сумма требует согласования?",
+        "kind": "decision",
+        "actor": "api"
+      },
+      {
+        "id": "approval",
+        "name": "Согласовать возврат",
+        "kind": "decision",
+        "actor": "reviewer"
+      },
+      {
+        "id": "execute",
+        "name": "Вернуть платёж",
+        "kind": "task",
+        "actor": "api"
+      },
+      {
+        "id": "decline",
+        "name": "Отклонить возврат",
+        "kind": "task",
+        "actor": "api"
+      },
+      {
+        "id": "completed",
+        "name": "Деньги возвращены",
+        "kind": "end",
+        "actor": "api"
+      },
+      {
+        "id": "rejected",
+        "name": "Возврат отклонён",
+        "kind": "end",
+        "actor": "api"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "from": "start",
+        "to": "validate",
+        "condition": "always"
+      },
+      {
+        "id": "e2",
+        "from": "validate",
+        "to": "threshold",
+        "condition": "always"
+      },
+      {
+        "id": "e3",
+        "from": "threshold",
+        "to": "approval",
+        "condition": "above_threshold",
+        "label": "> 10000 RUB; согласование включено"
+      },
+      {
+        "id": "e4",
+        "from": "threshold",
+        "to": "execute",
+        "condition": "below_threshold",
+        "label": "≤ 10000 RUB или без согласования"
+      },
+      {
+        "id": "e5",
+        "from": "approval",
+        "to": "execute",
+        "condition": "approved",
+        "label": "Одобрено"
+      },
+      {
+        "id": "e6",
+        "from": "approval",
+        "to": "decline",
+        "condition": "rejected",
+        "label": "Отклонено"
+      },
+      {
+        "id": "e7",
+        "from": "execute",
+        "to": "completed",
+        "condition": "always"
+      },
+      {
+        "id": "e8",
+        "from": "decline",
+        "to": "rejected",
+        "condition": "always"
+      }
+    ]
+  },
+  "entities": [
+    {
+      "id": "entity0",
+      "name": "Заказ",
+      "fields": [
+        {
+          "name": "order_id",
+          "type": "string",
+          "key": true
+        },
+        {
+          "name": "customer_id",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "total",
+          "type": "decimal",
+          "key": false
+        },
+        {
+          "name": "paid_at",
+          "type": "datetime",
+          "key": false
+        }
+      ]
+    },
+    {
+      "id": "entity1",
+      "name": "Возврат",
+      "fields": [
+        {
+          "name": "refund_id",
+          "type": "string",
+          "key": true
+        },
+        {
+          "name": "order_id",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "amount",
+          "type": "decimal",
+          "key": false
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "key": false
+        }
+      ]
+    },
+    {
+      "id": "entity2",
+      "name": "Платёж",
+      "fields": [
+        {
+          "name": "payment_id",
+          "type": "string",
+          "key": true
+        },
+        {
+          "name": "refund_id",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "gateway_reference",
+          "type": "string",
+          "key": false
+        },
+        {
+          "name": "settled_at",
+          "type": "datetime",
+          "key": false
+        }
+      ]
+    }
+  ],
+  "entityRelations": [
+    {
+      "from": "entity0",
+      "to": "entity1",
+      "label": "содержит",
+      "cardinality": "one-to-many"
+    },
+    {
+      "from": "entity1",
+      "to": "entity2",
+      "label": "исполняется через",
+      "cardinality": "one-to-many"
+    }
+  ],
+  "states": [
+    {
+      "id": "start",
+      "name": "Заявка на возврат"
+    },
+    {
+      "id": "validate",
+      "name": "Проверить заказ и срок возврата"
+    },
+    {
+      "id": "threshold",
+      "name": "Сумма требует согласования?"
+    },
+    {
+      "id": "approval",
+      "name": "Согласовать возврат"
+    },
+    {
+      "id": "execute",
+      "name": "Вернуть платёж"
+    },
+    {
+      "id": "decline",
+      "name": "Отклонить возврат"
+    },
+    {
+      "id": "completed",
+      "name": "Деньги возвращены"
+    },
+    {
+      "id": "rejected",
+      "name": "Возврат отклонён"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "start",
+      "to": "validate",
+      "label": "Далее"
+    },
+    {
+      "from": "validate",
+      "to": "threshold",
+      "label": "Далее"
+    },
+    {
+      "from": "threshold",
+      "to": "approval",
+      "label": "> 10000 RUB; согласование включено"
+    },
+    {
+      "from": "threshold",
+      "to": "execute",
+      "label": "≤ 10000 RUB или без согласования"
+    },
+    {
+      "from": "approval",
+      "to": "execute",
+      "label": "Одобрено"
+    },
+    {
+      "from": "approval",
+      "to": "decline",
+      "label": "Отклонено"
+    },
+    {
+      "from": "execute",
+      "to": "completed",
+      "label": "Далее"
+    },
+    {
+      "from": "decline",
+      "to": "rejected",
+      "label": "Далее"
+    }
+  ],
+  "rules": {
+    "approvalThreshold": 10000,
+    "currency": "RUB",
+    "requireApproval": true
+  },
+  "stack": [
+    {
+      "name": "TypeScript / Fastify",
+      "purpose": "Сервис возвратов"
+    },
+    {
+      "name": "PostgreSQL",
+      "purpose": "Хранение предметных сущностей и аудита"
+    },
+    {
+      "name": "HTTPS API",
+      "purpose": "Платёжный шлюз"
+    }
+  ]
+}

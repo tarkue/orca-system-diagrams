@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{font:14px ui-sans-serif;background:#202020;color:white}section{margin:24px;overflow:auto}svg{max-width:none}</style></head><body><h1>Diagram label layout regression</h1><script type="module">
+import {renderNotation} from '/src/notations/render.ts';
+import canonical from '/orca-plugin/model.json';
+import {sampleProjects} from '/src/core/index.ts';
+const long=structuredClone(canonical);long.id='long-label-regression';long.workflow.steps.forEach(s=>{s.name+=' — '+('Длинное описание операции и ожидаемого результата ').repeat(3)});long.workflow.edges.forEach(e=>{e.label='Переход после успешного завершения предыдущего действия'});
+window.layoutResults=[];window.layoutReady=false;window.diagramExports={};
+for(const [name,model] of [['canonical',canonical],['long',long],...sampleProjects.map(m=>[m.id,m])])for(const notation of (name==='canonical'?['c4','bpmn','epc','sequence','er','state']:['bpmn','sequence'])){
+const section=document.createElement('section');section.dataset.case=name+'-'+notation;section.innerHTML='<h2>'+name+' '+notation+'</h2>';document.body.append(section);
+try{const r=await renderNotation(model,notation,name+'-'+notation,{'--background':'#0a0a0a','--card':'#171717','--foreground':'#fafafa','--muted-foreground':'#a1a1a1','--border':'#ffffff12'});section.insertAdjacentHTML('beforeend',r.svg);section.querySelector('svg').style.width=r.width+'px';section.querySelector('svg').style.height=r.height+'px';if(name==='canonical')window.diagramExports[notation]=r.svg;window.layoutResults.push({name,notation,width:r.width,height:r.height});}catch(e){window.layoutResults.push({name,notation,error:String(e)})}
+}
+
+window.layoutEvidence=[...document.querySelectorAll('section[data-case]')].filter(s=>/-(bpmn|sequence)$/.test(s.dataset.case)).map(section=>{
+const svg=section.querySelector('svg');if(!svg)return {case:section.dataset.case,passed:false,error:'No SVG'};
+const scale=svg.viewBox.baseVal.width/svg.getBoundingClientRect().width;
+const box=e=>{const r=e.getBoundingClientRect();return {x:r.left*scale,y:r.top*scale,w:r.width*scale,h:r.height*scale}};
+const overlaps=(a,b)=>Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>1&&Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)>1;
+const texts=[...svg.querySelectorAll('text')].filter(t=>t.textContent.trim()),collisions=[];
+if(section.dataset.case.endsWith('bpmn'))for(let i=0;i<texts.length;i++)for(let j=i+1;j<texts.length;j++)if(overlaps(box(texts[i]),box(texts[j])))collisions.push([texts[i].textContent,texts[j].textContent]);
+const notes=[...svg.querySelectorAll('g[data-et="note"]')].map(g=>{const r=box(g.querySelector('rect.note'));const ts=[...g.querySelectorAll('text.noteText')];return {text:ts.map(t=>t.textContent).join(' '),mapped:!!g.dataset.modelId,inside:ts.every(t=>{const b=box(t);return b.x>=r.x-1&&b.x+b.w<=r.x+r.w+1&&b.y>=r.y-1&&b.y+b.h<=r.y+r.h+1})}});
+const taskOverflows=[...svg.querySelectorAll('[data-element-id]')].filter(g=>/^Step_/.test(g.getAttribute('data-element-id'))&&!/_label$/.test(g.getAttribute('data-element-id'))).flatMap(g=>{const t=g.querySelector('text'),r=g.querySelector('.djs-visual > rect');if(!t||!r)return [];const a=box(r),b=box(t);return b.x<a.x-1||b.x+b.w>a.x+a.w+1||b.y<a.y-1||b.y+b.h>a.y+a.h+1?[t.textContent]:[]});
+return {case:section.dataset.case,passed:collisions.length===0&&taskOverflows.length===0&&notes.every(n=>n.inside&&n.mapped),collisions,taskOverflows,notes};
+});
+const report=document.createElement('pre');report.id='layout-evidence';report.textContent=JSON.stringify({renders:window.layoutResults,cases:window.layoutEvidence});document.body.prepend(report);document.body.dataset.ready='true';window.layoutReady=true;
+</script></body></html>

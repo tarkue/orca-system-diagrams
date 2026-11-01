@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Схемы системы — увидеть архитектуру в Orca</title>
+  <meta name="description" content="Нативный плагин для Orca: шесть представлений одной модели системы, инспектор элементов и JSON только для чтения. Бесплатная загрузка версии 0.3.0.">
+  <meta name="theme-color" content="#f5f5f7">
+  <meta property="og:title" content="Ваш агент пишет код. Вы видите систему.">
+  <meta property="og:description" content="Схемы системы — нативный плагин для Orca. Шесть нотаций, одна модель.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tarkue.github.io/orca-system-diagrams/">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./script.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">К содержимому</a>
+<header class="site-header"><nav class="nav wrap" aria-label="Основная навигация">
+  <a class="brand" href="#" aria-label="Схемы системы — начало"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 5h8v8H5zM19 19h8v8h-8zM19 5h8v8h-8z"/><path class="mark-line" d="M9 13v10h10M13 9h6"/></svg><span>Схемы системы</span></a>
+  <div class="nav-links"><a href="#notations">Возможности</a><a href="#install">Установка</a><a href="https://github.com/tarkue/orca-system-diagrams">GitHub <span aria-hidden="true">↗</span></a></div>
+  <a class="button small" href="./downloads/orca-system-diagrams-0.3.0.zip" download>Скачать <span aria-hidden="true">↓</span></a>
+</nav></header>
+<main id="main">
+<section class="hero wrap">
+  <p class="eyebrow"><span class="status-dot"></span> Нативный плагин для Orca <span class="version">Beta · 0.3.0</span></p>
+  <h1>Ваш агент пишет код.<br><span>Вы видите систему.</span></h1>
+  <p class="hero-copy">От отдельных изменений — к целой картине.<br>Архитектура, процессы и данные в одной панели Orca.</p>
+  <div class="hero-actions"><a class="button" href="./downloads/orca-system-diagrams-0.3.0.zip" download>Скачать плагин <span aria-hidden="true">↓</span></a><a class="text-link" href="#notations">Рассмотреть схемы <span aria-hidden="true">↘</span></a></div>
+  <p class="hero-note">Локальная установка · Открытый исходный код · Без отдельного сервиса</p>
+</section>
+<section class="product-section wrap" aria-labelledby="product-title">
+  <h2 class="sr-only" id="product-title">Пример панели плагина</h2>
+  <div class="product-frame">
+    <div class="window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Orca / Схемы системы</span><span class="frame-badge">Иллюстрация интерфейса</span></div>
+    <div class="product-toolbar"><span class="product-name">Схемы системы</span><span class="toolbar-current">C4</span><span class="toolbar-json">JSON</span><span class="toolbar-zoom">100% <span aria-hidden="true">⌄</span></span><span class="inspector-icon" aria-hidden="true">◧</span></div>
+    <div class="product-workspace"><div class="diagram-paper"><img src="./assets/c4.svg" alt="Пример C4-представления модели плагина Схемы системы" width="1100" height="680"></div><aside class="mock-inspector" aria-label="Иллюстрация инспектора"><div class="inspector-heading">Инспектор <span aria-hidden="true">↗</span></div><p class="inspector-label">ЭЛЕМЕНТЫ МОДЕЛИ</p><span class="selected-element">Модель системы</span><span>Сборка плагина</span><span>Панель Orca</span><div class="inspector-detail"><span class="inspector-label">В ФОКУСЕ</span><strong>Модель системы</strong><p>Одна структура данных для всех представлений.</p><span class="code-tag">SystemModel</span></div></aside></div>
+    <div class="product-status"><span><span class="status-dot"></span> Одна модель · шесть представлений</span><span>JSON · только чтение</span></div>
+  </div>
+  <p class="frame-caption"><span>01 / Вся система рядом с кодом</span><span>Пример модели. Не снимок рабочей сессии.</span></p>
+</section>
+<section class="intro section wrap">
+  <p class="eyebrow">МЕНЬШЕ ПЕРЕКЛЮЧЕНИЙ. БОЛЬШЕ КОНТЕКСТА.</p>
+  <h2>Код меняется по частям.<br><span class="muted">Система видна целиком.</span></h2>
+  <div class="intro-bottom"><p>Кто вызывает сервис? Где проходит процесс? Как связаны данные? Переключайте взгляд на одну модель, оставаясь внутри IDE.</p><p>Панель помогает читать устройство системы: масштабировать схему, выбирать элементы, раскрывать связи и сверяться с исходным JSON.</p></div>
+</section>
+<section class="gallery section" id="notations" aria-labelledby="gallery-title">
+  <div class="wrap"><div class="section-heading"><div><p class="eyebrow">ШЕСТЬ СПОСОБОВ ПОСМОТРЕТЬ</p><h2 id="gallery-title">Одна модель.<br><span class="muted">Разные вопросы.</span></h2></div><p>От общего устройства<br>до конкретного перехода.</p></div>
+  <div class="notation-tabs" role="tablist" aria-label="Нотации диаграмм">
+    <button id="tab-c4" role="tab" aria-selected="true" aria-controls="panel-c4" tabindex="0">C4</button><button id="tab-bpmn" role="tab" aria-selected="false" aria-controls="panel-bpmn" tabindex="-1">BPMN</button><button id="tab-epc" role="tab" aria-selected="false" aria-controls="panel-epc" tabindex="-1">EPC</button><button id="tab-sequence" role="tab" aria-selected="false" aria-controls="panel-sequence" tabindex="-1">Sequence</button><button id="tab-er" role="tab" aria-selected="false" aria-controls="panel-er" tabindex="-1">ER</button><button id="tab-state" role="tab" aria-selected="false" aria-controls="panel-state" tabindex="-1">State</button>
+  </div>
+  <div class="gallery-panels">
+<div id="panel-c4" role="tabpanel" aria-labelledby="tab-c4" tabindex="0"><div class="gallery-image"><a href="./assets/c4.svg" target="_blank" rel="noopener" aria-label="Открыть C4 в полном размере"><img src="./assets/c4.svg" alt="Как устроена система: пример диаграммы C4 модели плагина" width="1200" height="720" loading="lazy"></a></div><div class="gallery-caption"><span class="figure-number">01 / C4</span><div><h3>Как устроена система</h3><p>Компоненты, их роли и связи. Общая картина архитектуры с описаниями и технологиями.</p></div><a class="example-label" href="./assets/c4.svg" download="system-c4.svg">SVG-пример ↓</a></div></div>
+<div id="panel-bpmn" role="tabpanel" aria-labelledby="tab-bpmn" tabindex="0" hidden><div class="gallery-image"><a href="./assets/bpmn.svg" target="_blank" rel="noopener" aria-label="Открыть BPMN в полном размере"><img src="./assets/bpmn.svg" alt="Как проходит процесс: пример диаграммы BPMN модели плагина" width="1200" height="720" loading="lazy"></a></div><div class="gallery-caption"><span class="figure-number">02 / BPMN</span><div><h3>Как проходит процесс</h3><p>Задачи, события, развилки и дорожки участников. Проследите путь от начала до результата.</p></div><a class="example-label" href="./assets/bpmn.svg" download="system-bpmn.svg">SVG-пример ↓</a></div></div>
+<div id="panel-epc" role="tabpanel" aria-labelledby="tab-epc" tabindex="0" hidden><div class="gallery-image"><a href="./assets/epc.svg" target="_blank" rel="noopener" aria-label="Открыть EPC в полном размере"><img src="./assets/epc.svg" alt="Что запускает действие: пример диаграммы EPC модели плагина" width="1200" height="720" loading="lazy"></a></div><div class="gallery-caption"><span class="figure-number">03 / EPC</span><div><h3>Что запускает действие</h3><p>События и функции в цепочке процесса. Увидьте условия переходов и логику выполнения.</p></div><a class="example-label" href="./assets/epc.svg" download="system-epc.svg">SVG-пример ↓</a></div></div>
+<div id="panel-sequence" role="tabpanel" aria-labelledby="tab-sequence" tabindex="0" hidden><div class="gallery-image"><a href="./assets/sequence.svg" target="_blank" rel="noopener" aria-label="Открыть SEQUENCE в полном размере"><img src="./assets/sequence.svg" alt="Кто с кем общается: пример диаграммы SEQUENCE модели плагина" width="1200" height="720" loading="lazy"></a></div><div class="gallery-caption"><span class="figure-number">04 / SEQUENCE</span><div><h3>Кто с кем общается</h3><p>Участники и сообщения во времени. Порядок взаимодействий становится видимым.</p></div><a class="example-label" href="./assets/sequence.svg" download="system-sequence.svg">SVG-пример ↓</a></div></div>
+<div id="panel-er" role="tabpanel" aria-labelledby="tab-er" tabindex="0" hidden><div class="gallery-image"><a href="./assets/er.svg" target="_blank" rel="noopener" aria-label="Открыть ER в полном размере"><img src="./assets/er.svg" alt="Как связаны данные: пример диаграммы ER модели плагина" width="1200" height="720" loading="lazy"></a></div><div class="gallery-caption"><span class="figure-number">05 / ER</span><div><h3>Как связаны данные</h3><p>Сущности, поля, ключи и отношения. Структура данных без погружения в отдельные файлы.</p></div><a class="example-label" href="./assets/er.svg" download="system-er.svg">SVG-пример ↓</a></div></div>
+<div id="panel-state" role="tabpanel" aria-labelledby="tab-state" tabindex="0" hidden><div class="gallery-image"><a href="./assets/state.svg" target="_blank" rel="noopener" aria-label="Открыть STATE в полном размере"><img src="./assets/state.svg" alt="Что происходит дальше: пример диаграммы STATE модели плагина" width="1200" height="720" loading="lazy"></a></div><div class="gallery-caption"><span class="figure-number">06 / STATE</span><div><h3>Что происходит дальше</h3><p>Состояния и переходы между ними. Жизненный цикл объекта в одном представлении.</p></div><a class="example-label" href="./assets/state.svg" download="system-state.svg">SVG-пример ↓</a></div></div>
+  </div></div>
+</section>
+<section class="details section wrap">
+  <div class="section-heading"><div><p class="eyebrow">ОТ ОБЩЕГО К ЧАСТНОМУ</p><h2>Приблизьте.<br>Разберите.<br><span class="muted">Поймите.</span></h2></div><div class="detail-list"><article><span>01</span><div><h3>Масштаб под задачу</h3><p>Общий план или отдельный узел. Быстрые шаги масштаба, готовые значения и навигация по большой схеме.</p></div></article><article><span>02</span><div><h3>Инспектор со связями</h3><p>Выберите элемент на схеме или в видимом списке. Прочитайте детали, перейдите к связанному элементу. Сверните панель, когда нужно больше пространства.</p></div></article><article><span>03</span><div><h3>Исходная модель рядом</h3><p>JSON открыт для чтения. Проверяйте, на каких данных построена схема, без отдельного редактора или ручного обмена файлами.</p></div></article></div></div>
+</section>
+<section class="workflow section">
+  <div class="wrap"><p class="eyebrow">ВАШ ПРИВЫЧНЫЙ ЧАТ. НОВЫЙ УРОВЕНЬ ОБЗОРА.</p><h2>Агент обновляет модель.<br><span>Панель показывает результат.</span></h2><p class="workflow-lead">Обсуждайте изменения в нативном чате Orca. По инструкции проекта агент проверяет исходники, меняет одну JSON-модель и выполняет конечную сборку плагина.</p>
+  <ol class="flow"><li><span class="flow-number">01</span><h3>Задача в чате</h3><p>Вы описываете изменение.<br>Агент работает с реальным кодом.</p></li><li><span class="flow-number">02</span><h3>Модель и сборка</h3><p>Агент обновляет модель.<br>Сборка проверяет её структуру.</p></li><li><span class="flow-number">03</span><h3>Новый вид системы</h3><p>В режиме разработки Orca<br>перезагружает собранную панель.</p></li></ol>
+  <div class="workflow-boundary"><p>Обновление требует явной работы агента и сборки. Плагин не сканирует репозиторий автоматически и не обновляет модель после каждого сообщения. Сейчас источник — один заданный файл модели; переключение workspace не привязывает другой проект.</p><a href="https://github.com/tarkue/orca-system-diagrams/blob/main/docs/INSTALL.md">Как настроить режим разработки <span aria-hidden="true">↗</span></a></div></div>
+</section>
+<section class="install section wrap" id="install" aria-labelledby="install-title">
+  <div class="section-heading"><div><p class="eyebrow">НАЧНИТЕ С ОДНОЙ ПАНЕЛИ</p><h2 id="install-title">Система.<br><span class="muted">Внутри Orca.</span></h2></div><div class="install-download"><a class="button" href="./downloads/orca-system-diagrams-0.3.0.zip" download>Скачать 0.3.0 <span aria-hidden="true">↓</span></a><p>ZIP · локальный плагин · beta</p></div></div>
+  <ol class="install-steps"><li><span>1</span><h3>Скачайте и распакуйте</h3><p>Сохраните ZIP и распакуйте папку плагина.</p></li><li><span>2</span><h3>Установите папку</h3><p>В Orca откройте Settings → Plugins и выберите установку из локальной папки с orca-plugin.json.</p></li><li><span>3</span><h3>Разрешите чтение</h3><p>Включите плагин и подтвердите единственное разрешение <code>workspace:read</code>.</p></li><li><span>4</span><h3>Откройте схемы</h3><p>Выберите «Схемы системы» в боковой панели Orca.</p></li></ol>
+  <p class="compatibility">Проверенная версия — Orca 1.4.218. Плагин в beta; совместимость с более новыми версиями пока не подтверждена. Для обновлений модели через агента отдельно настройте <a href="https://github.com/tarkue/orca-system-diagrams/blob/main/docs/INSTALL.md">режим разработки</a>.</p>
+</section>
+<section class="faq section wrap" aria-labelledby="faq-title"><div><p class="eyebrow">ДЕТАЛИ ПЕРЕД УСТАНОВКОЙ</p><h2 id="faq-title">Хорошие вопросы.</h2></div><div class="faq-list">
+  <details><summary>Это отдельное приложение?</summary><p>Это нативный плагин просмотра схем внутри Orca. Он использует существующий чат IDE для работы с агентом и не запускает отдельный веб-сервис.</p></details>
+  <details><summary>Схемы строятся из кода автоматически?</summary><p>Нет. Агент изучает исходники и явно обновляет структурированную JSON-модель по инструкции проекта. Плагин отображает шесть представлений этой модели. Полнота схемы зависит от её содержимого.</p></details>
+  <details><summary>Можно редактировать схему в панели?</summary><p>Панель предназначена для просмотра: нотации, масштаб, инспектор и JSON только для чтения. Изменения модели выполняет агент в нативном чате Orca с последующей сборкой.</p></details>
+  <details><summary>Можно скачать диаграмму прямо из Orca?</summary><p>В проверенной Orca 1.4.218 хост блокирует прямое скачивание из панели и не предоставляет действие сохранения. Поэтому в плагине нет кнопки, обещающей такой экспорт. SVG-примеры доступны в исходном репозитории; это отдельные подготовленные файлы.</p></details>
+  <details><summary>Какие данные получает плагин?</summary><p>Плагин запрашивает только workspace:read. Он показывает встроенную при сборке модель, не отправляет её на внешний сервис и не запускает собственных агентов. Этот сайт не содержит форм сбора данных или аналитических скриптов.</p></details>
+  <details><summary>Это официальный продукт Orca?</summary><p>Нет. «Схемы системы / System Diagrams» — независимый проект с открытым исходным кодом. Orca — название среды, для которой создан плагин.</p></details>
+</div></section>
+<section class="closing wrap"><p class="eyebrow">СХЕМЫ СИСТЕМЫ / SYSTEM DIAGRAMS</p><h2>Следите за мыслью.<br><span class="muted">Не теряйте систему.</span></h2><div class="hero-actions"><a class="button" href="./downloads/orca-system-diagrams-0.3.0.zip" download>Скачать плагин <span aria-hidden="true">↓</span></a><a class="text-link" href="https://github.com/tarkue/orca-system-diagrams">Исходный код <span aria-hidden="true">↗</span></a></div></section>
+</main>
+<footer class="site-footer wrap"><span>Схемы системы <span class="muted">© 2026</span></span><p>Независимый плагин для Orca.</p><a href="https://github.com/tarkue/orca-system-diagrams">GitHub ↗</a></footer>
+</body>
+</html>

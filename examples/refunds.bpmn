@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="urn:diagram-ide:bpmn" exporter="Diagram IDE" exporterVersion="1">
+  <bpmn:process id="Process_1" name="Возвраты заказов" isExecutable="false">
+    <bpmn:documentation>Покупатель запрашивает возврат заказа; финансовый менеджер согласует крупную сумму, платёжный шлюз возвращает деньги. / Model refunds v1. Conditions use amount (RUB) and decision (approved/rejected). Approval enabled: true; threshold: 10000. Interchange only; no service integrations executed.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_0" name="Покупатель">
+        <bpmn:flowNodeRef>Step_0</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_1" name="Сервис возвратов">
+        <bpmn:flowNodeRef>Step_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Step_2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Step_4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Step_5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Step_6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Step_7</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_2" name="Финансовый менеджер">
+        <bpmn:flowNodeRef>Step_3</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Step_0" name="Заявка на возврат">
+      <bpmn:documentation>Actor: Покупатель / Web browser</bpmn:documentation>
+      <bpmn:outgoing>Flow_0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Step_1" name="Проверить заказ и срок возврата">
+      <bpmn:documentation>Actor: Сервис возвратов / TypeScript / Fastify</bpmn:documentation>
+      <bpmn:incoming>Flow_0</bpmn:incoming>
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Step_2" name="Сумма требует согласования?" gatewayDirection="Diverging">
+      <bpmn:documentation>Actor: Сервис возвратов / TypeScript / Fastify</bpmn:documentation>
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Step_3" name="Согласовать возврат" gatewayDirection="Diverging">
+      <bpmn:documentation>Actor: Финансовый менеджер / Рабочее место оператора</bpmn:documentation>
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Step_4" name="Вернуть платёж">
+      <bpmn:documentation>Actor: Сервис возвратов / TypeScript / Fastify</bpmn:documentation>
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Step_5" name="Отклонить возврат">
+      <bpmn:documentation>Actor: Сервис возвратов / TypeScript / Fastify</bpmn:documentation>
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="Step_6" name="Деньги возвращены">
+      <bpmn:documentation>Actor: Сервис возвратов / TypeScript / Fastify</bpmn:documentation>
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Step_7" name="Возврат отклонён">
+      <bpmn:documentation>Actor: Сервис возвратов / TypeScript / Fastify</bpmn:documentation>
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0" sourceRef="Step_0" targetRef="Step_1" name="Далее">
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="Step_1" targetRef="Step_2" name="Далее">
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Step_2" targetRef="Step_3" name="&gt; 10000 RUB; согласование включено / true &amp;&amp; amount &gt; 10000">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="https://www.ecma-international.org/ecma-262/">true &amp;&amp; amount &gt; 10000</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Step_2" targetRef="Step_4" name="≤ 10000 RUB или без согласования / !true || amount &lt;= 10000">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="https://www.ecma-international.org/ecma-262/">!true || amount &lt;= 10000</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Step_3" targetRef="Step_4" name="Одобрено / decision === &quot;approved&quot;">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="https://www.ecma-international.org/ecma-262/">decision === &quot;approved&quot;</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Step_3" targetRef="Step_5" name="Отклонено / decision === &quot;rejected&quot;">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="https://www.ecma-international.org/ecma-262/">decision === &quot;rejected&quot;</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Step_4" targetRef="Step_6" name="Далее">
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Step_5" targetRef="Step_7" name="Далее">
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_1">
+    <bpmndi:BPMNPlane id="Plane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="Shape_Lane_0" bpmnElement="Lane_0" isHorizontal="true">
+        <dc:Bounds x="40" y="80" width="3220" height="440"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_1" bpmnElement="Lane_1" isHorizontal="true">
+        <dc:Bounds x="40" y="520" width="3220" height="440"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_2" bpmnElement="Lane_2" isHorizontal="true">
+        <dc:Bounds x="40" y="960" width="3220" height="440"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Step_0" bpmnElement="Step_0">
+        <dc:Bounds x="182" y="120" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="90" y="168" width="220" height="36"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Step_1" bpmnElement="Step_1">
+        <dc:Bounds x="620" y="560" width="200" height="100"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Step_2" bpmnElement="Step_2" isMarkerVisible="true">
+        <dc:Bounds x="1215" y="560" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1130" y="622" width="220" height="56"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Step_3" bpmnElement="Step_3" isMarkerVisible="true">
+        <dc:Bounds x="1735" y="1000" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1650" y="1062" width="220" height="36"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Step_4" bpmnElement="Step_4">
+        <dc:Bounds x="2180" y="560" width="200" height="100"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Step_5" bpmnElement="Step_5">
+        <dc:Bounds x="2180" y="740" width="200" height="100"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Step_6" bpmnElement="Step_6">
+        <dc:Bounds x="2782" y="560" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2690" y="608" width="220" height="36"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Step_7" bpmnElement="Step_7">
+        <dc:Bounds x="2782" y="740" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2690" y="788" width="220" height="36"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_0" bpmnElement="Flow_0">
+        <di:waypoint x="218" y="138"/>
+        <di:waypoint x="460" y="138"/>
+        <di:waypoint x="460" y="610"/>
+        <di:waypoint x="620" y="610"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="350" y="326" width="220" height="36"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_1" bpmnElement="Flow_1">
+        <di:waypoint x="820" y="610"/>
+        <di:waypoint x="980" y="610"/>
+        <di:waypoint x="980" y="585"/>
+        <di:waypoint x="1215" y="585"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="870" y="549.5" width="220" height="36"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_2" bpmnElement="Flow_2">
+        <di:waypoint x="1265" y="585"/>
+        <di:waypoint x="1500" y="585"/>
+        <di:waypoint x="1500" y="1025"/>
+        <di:waypoint x="1735" y="1025"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1390" y="717" width="220" height="76"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_3" bpmnElement="Flow_3">
+        <di:waypoint x="1265" y="585"/>
+        <di:waypoint x="1500" y="585"/>
+        <di:waypoint x="1500" y="610"/>
+        <di:waypoint x="2180" y="610"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1390" y="509.5" width="220" height="76"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_4" bpmnElement="Flow_4">
+        <di:waypoint x="1785" y="1025"/>
+        <di:waypoint x="2020" y="1025"/>
+        <di:waypoint x="2020" y="610"/>
+        <di:waypoint x="2180" y="610"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1910" y="749.5" width="220" height="56"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_5" bpmnElement="Flow_5">
+        <di:waypoint x="1785" y="1025"/>
+        <di:waypoint x="2020" y="1025"/>
+        <di:waypoint x="2020" y="790"/>
+        <di:waypoint x="2180" y="790"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1910" y="839.5" width="220" height="56"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_6" bpmnElement="Flow_6">
+        <di:waypoint x="2380" y="610"/>
+        <di:waypoint x="2540" y="610"/>
+        <di:waypoint x="2540" y="578"/>
+        <di:waypoint x="2782" y="578"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2430" y="546" width="220" height="36"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_7" bpmnElement="Flow_7">
+        <di:waypoint x="2380" y="790"/>
+        <di:waypoint x="2540" y="790"/>
+        <di:waypoint x="2540" y="758"/>
+        <di:waypoint x="2782" y="758"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2430" y="726" width="220" height="36"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

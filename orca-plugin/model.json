@@ -1,0 +1,378 @@
+{
+  "id": "system-diagram-viewer",
+  "name": "Архитектура расширения «Схемы системы»",
+  "description": "Описание фактически реализованных файлов и компонентов этого репозитория. Агент записывает model.json и выполняет сборку; watcher Orca перезагружает development-панель. Workflow показывает успешный путь; ошибка валидации останавливает сборку и сохраняет предыдущий HTML. Это описание архитектуры, а не автоматическое извлечение или доказательство выполнения. Поля rules оставлены для совместимости старой схемы и viewer их не исполняет.",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "user",
+      "name": "Пользователь Orca",
+      "kind": "person",
+      "description": "Обсуждает систему со штатным агентом и просматривает схемы.",
+      "technology": "Orca UI"
+    },
+    {
+      "id": "agent",
+      "name": "Штатный агент Orca",
+      "kind": "service",
+      "description": "Редактирует файл модели в репозитории и запускает сборку по запросу пользователя. Панель сама агента не запускает.",
+      "technology": "Native Orca agent / local CLI"
+    },
+    {
+      "id": "model_file",
+      "name": "Файл модели",
+      "kind": "database",
+      "description": "Единственный исходный документ этой панели: orca-plugin/model.json; обычный JSON-файл, не СУБД.",
+      "technology": "JSON / filesystem"
+    },
+    {
+      "id": "validator",
+      "name": "Валидатор модели",
+      "kind": "service",
+      "description": "Общий src/core/validation.ts проверяет структуру, размер и ссылки до замены панели.",
+      "technology": "TypeScript / validateModel"
+    },
+    {
+      "id": "builder",
+      "name": "Сборщик панели",
+      "kind": "service",
+      "description": "scripts/build-plugin.mjs встраивает проверенную модель, React, renderers и CSS; выполняется как конечная команда, не сервер.",
+      "technology": "Node.js / esbuild"
+    },
+    {
+      "id": "package",
+      "name": "Пакет расширения",
+      "kind": "database",
+      "description": "orca-plugin/package содержит panel.html, manifest и SHA256SUMS; файл HTML заменяется атомарно.",
+      "technology": "HTML / JSON / filesystem"
+    },
+    {
+      "id": "host",
+      "name": "Нативный host Orca",
+      "kind": "external",
+      "description": "После подключения development path отслеживает пакет, обновляет discovery и documentRevision. Установленная копия сама source не отслеживает.",
+      "technology": "Orca 1.4.218 / Electron"
+    },
+    {
+      "id": "viewer",
+      "name": "Схемы системы",
+      "kind": "service",
+      "description": "Нативная sandbox-панель показывает нотации, сворачиваемый инспектор и JSON только для чтения.",
+      "technology": "React / native plugin iframe"
+    }
+  ],
+  "relations": [
+    {
+      "id": "r1",
+      "from": "user",
+      "to": "agent",
+      "label": "Запросить изменение описания системы"
+    },
+    {
+      "id": "r2",
+      "from": "agent",
+      "to": "model_file",
+      "label": "Записать JSON-модель"
+    },
+    {
+      "id": "r3",
+      "from": "agent",
+      "to": "builder",
+      "label": "Выполнить node scripts/build-plugin.mjs"
+    },
+    {
+      "id": "r4",
+      "from": "builder",
+      "to": "model_file",
+      "label": "Прочитать исходный документ"
+    },
+    {
+      "id": "r5",
+      "from": "builder",
+      "to": "validator",
+      "label": "Проверить схему и ссылки"
+    },
+    {
+      "id": "r6",
+      "from": "builder",
+      "to": "package",
+      "label": "Атомарно записать HTML и хеши"
+    },
+    {
+      "id": "r7",
+      "from": "host",
+      "to": "package",
+      "label": "Следить за зарегистрированным dev path"
+    },
+    {
+      "id": "r8",
+      "from": "host",
+      "to": "viewer",
+      "label": "Открыть HTML и обновить documentRevision"
+    },
+    {
+      "id": "r9",
+      "from": "viewer",
+      "to": "host",
+      "label": "Прочитать имя и ветку workspace"
+    },
+    {
+      "id": "r10",
+      "from": "user",
+      "to": "viewer",
+      "label": "Просмотреть схемы, инспектор и JSON"
+    }
+  ],
+  "workflow": {
+    "steps": [
+      {
+        "id": "requested",
+        "name": "Изменение описания запрошено",
+        "kind": "start",
+        "actor": "user"
+      },
+      {
+        "id": "edited",
+        "name": "Агент записывает model.json",
+        "kind": "task",
+        "actor": "agent"
+      },
+      {
+        "id": "validated",
+        "name": "Проверить JSON и ссылки; при ошибке остановиться",
+        "kind": "task",
+        "actor": "validator"
+      },
+      {
+        "id": "bundled",
+        "name": "Собрать inline viewer с проверенной моделью",
+        "kind": "task",
+        "actor": "builder"
+      },
+      {
+        "id": "written",
+        "name": "Атомарно заменить panel.html",
+        "kind": "task",
+        "actor": "builder"
+      },
+      {
+        "id": "reloaded",
+        "name": "Dev watcher обновляет документ панели",
+        "kind": "task",
+        "actor": "host"
+      },
+      {
+        "id": "visible",
+        "name": "Схемы и JSON доступны для чтения",
+        "kind": "end",
+        "actor": "viewer"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "from": "requested",
+        "to": "edited",
+        "label": "После успешного шага",
+        "condition": "always"
+      },
+      {
+        "id": "e2",
+        "from": "edited",
+        "to": "validated",
+        "label": "После успешного шага",
+        "condition": "always"
+      },
+      {
+        "id": "e3",
+        "from": "validated",
+        "to": "bundled",
+        "label": "Только если модель допустима",
+        "condition": "always"
+      },
+      {
+        "id": "e4",
+        "from": "bundled",
+        "to": "written",
+        "label": "После успешного шага",
+        "condition": "always"
+      },
+      {
+        "id": "e5",
+        "from": "written",
+        "to": "reloaded",
+        "label": "После успешного шага",
+        "condition": "always"
+      },
+      {
+        "id": "e6",
+        "from": "reloaded",
+        "to": "visible",
+        "label": "После успешного шага",
+        "condition": "always"
+      }
+    ]
+  },
+  "entities": [
+    {
+      "id": "document",
+      "name": "ModelDocument",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "key": true
+        },
+        {
+          "name": "version",
+          "type": "integer"
+        },
+        {
+          "name": "nodes",
+          "type": "SystemNode[]"
+        },
+        {
+          "name": "relations",
+          "type": "SystemRelation[]"
+        }
+      ]
+    },
+    {
+      "id": "artifact",
+      "name": "BuildArtifact",
+      "fields": [
+        {
+          "name": "file",
+          "type": "path",
+          "key": true
+        },
+        {
+          "name": "modelHash",
+          "type": "sha256"
+        },
+        {
+          "name": "htmlBytes",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "id": "registration",
+      "name": "DevPanelRegistration",
+      "fields": [
+        {
+          "name": "pluginKey",
+          "type": "string",
+          "key": true
+        },
+        {
+          "name": "panelId",
+          "type": "string"
+        },
+        {
+          "name": "devPath",
+          "type": "path"
+        },
+        {
+          "name": "capabilities",
+          "type": "workspace:read[]"
+        }
+      ]
+    }
+  ],
+  "entityRelations": [
+    {
+      "from": "document",
+      "to": "artifact",
+      "label": "встраивается в",
+      "cardinality": "one-to-many"
+    },
+    {
+      "from": "registration",
+      "to": "artifact",
+      "label": "отслеживает dev-каталог",
+      "cardinality": "one-to-one"
+    }
+  ],
+  "states": [
+    {
+      "id": "edited",
+      "name": "Файл изменён"
+    },
+    {
+      "id": "valid",
+      "name": "Модель допустима"
+    },
+    {
+      "id": "built",
+      "name": "HTML собран"
+    },
+    {
+      "id": "loaded",
+      "name": "Панель обновлена"
+    },
+    {
+      "id": "invalid",
+      "name": "Сборка остановлена; прежний HTML сохранён"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "edited",
+      "to": "valid",
+      "label": "Валидация успешна"
+    },
+    {
+      "from": "edited",
+      "to": "invalid",
+      "label": "Ошибка JSON, графа или лимита"
+    },
+    {
+      "from": "valid",
+      "to": "built",
+      "label": "Сборка и атомарная запись"
+    },
+    {
+      "from": "built",
+      "to": "loaded",
+      "label": "Dev watcher и documentRevision"
+    },
+    {
+      "from": "invalid",
+      "to": "edited",
+      "label": "Агент исправил файл"
+    },
+    {
+      "from": "loaded",
+      "to": "edited",
+      "label": "Агент обновил описание"
+    }
+  ],
+  "rules": {
+    "approvalThreshold": 0,
+    "currency": "unused-compatibility",
+    "requireApproval": false
+  },
+  "stack": [
+    {
+      "name": "React / TypeScript",
+      "purpose": "Нативный viewer и инспектор"
+    },
+    {
+      "name": "Node.js / esbuild",
+      "purpose": "Конечная команда сборки без HTTP-сервера"
+    },
+    {
+      "name": "JSON / filesystem",
+      "purpose": "Исходная модель и артефакты"
+    },
+    {
+      "name": "Orca plugin API1",
+      "purpose": "Контекст workspace и host-owned dev reload"
+    },
+    {
+      "name": "Notation renderers",
+      "purpose": "Представления единой модели; конкретные renderers определяет исходный код"
+    }
+  ]
+}

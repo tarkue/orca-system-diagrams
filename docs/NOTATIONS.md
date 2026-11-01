@@ -1,0 +1,33 @@
+# Notation rendering decisions
+
+The native panel calls `renderNotation(model, notation, id, themeTokens)` from `src/notations/render.ts`. It returns SVG, natural dimensions and a stable SVG-element-to-model-ID map. Renderers run in browser DOM; no server or remote assets are required. Raw Orca color tokens are normalized and validated, and the host font stack is used. Diagram labels are escaped independently for XML/SVG and Mermaid. The same validated model feeds all views; no business UI is introduced.
+
+## C4
+
+The [official C4 notation guidance](https://c4model.com/diagrams/notation) explicitly leaves notation open. It recommends a title, legend, explicit element types, descriptions, container technologies and directed labelled relationships. Our container view uses person silhouettes, typed service containers, cylindrical stores, external software-system double boxes, and a dashed system boundary. Those shapes are a recognizable convention, not a prescribed C4 standard. Text is wrapped and bounded; full model text remains available through element IDs to the inspector. Protocols absent from the model are not invented.
+
+## BPMN
+
+[OMG BPMN 2.0.2](https://www.omg.org/spec/BPMN/2.0.2/PDF) defines events, activities, gateways, sequence flow and lanes (chapters 8–10). Rendering uses the real [bpmn-js viewer](https://bpmn.io/toolkit/bpmn-js/walkthrough/) importing `exportBpmnXml(model)`, then exporting its SVG: thin start-event circles, thick end-event circles, rounded task rectangles, exclusive-gateway diamonds with an X marker, directed sequence flows, and actor lanes. Every workflow step belongs to its assigned actor lane; an explicit unassigned lane is used when no actor is given. DI positions/shapes/waypoints accompany all three sample files. Frozen model threshold/approval expressions remain in XML. This is model interchange, not an engine deployment or an ARIS project file.
+
+The [bpmn.io license](https://bpmn.io/license/) requires its notice and fully visible, unobscured linked watermark. Library source is unmodified. Because `saveSVG` excludes the HTML watermark, the exact library-created logo artwork is cloned into a reserved SVG footer with its original link, clear of diagram content. Package notices must retain the complete installed `bpmn-js/LICENSE` (packaging owner notified); SVG attribution is not a substitute for that notice.
+
+## EPC
+
+The [ARIS Method Manual](https://docs.aris.com/10.0.28.0/yaa-method-guide/en/Method-Manual.pdf), process-control/EPC section, and [ARIS EPC overview](https://ariscommunity.com/event-driven-process-chain) describe events, functions and logical connectors. Our supported exclusive-choice subset uses pink event hexagons, green rounded functions and circular XOR connectors marked ×. A decision is represented as a decision-performing function followed by an XOR split, rather than as a decision-making event. All actual splits and joins pass through connectors, including branching tasks. Derived result events between consecutive functions preserve event/function alternation across connectors; derived glyphs map to their originating model step/edge. The subset has no AND/OR concurrency because the shared model does not express it. No vendor file compatibility is claimed.
+
+## ER, Sequence and State
+
+[Mermaid’s ER cardinality reference](https://mermaid.js.org/syntax/entityRelationshipDiagram.html) documents the crow’s-foot endpoint semantics used here: one, optional and many. ER SVG tables contain actual fields and key markers; endpoints derive from the model’s declared cardinality in each direction. A missing/unrecognized cardinality is a dashed unmarked association, explicitly labelled unspecified, rather than a fabricated one-to-many relationship. Supported aliases include one-to-one, one-to-many, many-to-one, many-to-many, optional-one variants and common numeric `1:n` forms.
+
+[Mermaid sequence diagrams](https://mermaid.js.org/syntax/sequenceDiagram.html) supply participant lifelines, messages and alternative fragments. Source traverses the actual workflow, with rule-derived guards and separate approval/rejection outcomes. A continuation is merged only if every path through every branch must reach it. [Mermaid state diagrams](https://mermaid.js.org/syntax/stateDiagram.html) supply rounded states and directed labelled transitions; workflow-linked start and end states gain the standard initial dot and final bullseye pseudostates. These are distinct notation views, not a uniform flowchart skin.
+
+## Diagram paper and shell contrast
+
+Sequence and State retain Mermaid’s conventional light-paper design independently of dark Orca shell tokens. Their returned SVGs contain an actual opaque white rectangle exactly covering the full viewBox, including negative origins, plus an explicit default palette. Sequence specifies actor fills/text/borders, message text and arrows, guard/ALT labels, loop frames, notes, lifelines and activation rectangles individually. This avoids mixing dark host backgrounds with Mermaid’s dark default text while preserving lavender participant boxes and yellow notes. C4 blue containers and EPC semantic colors are unchanged; other renderers are outside this contrast fix.
+
+`src/notations/contrast.html` checks actual computed leaf-glyph and stroke colors on a dark host using the canonical model, sample model, long labels and an activation diagnostic. Mermaid puts the rendered actor text color on child `tspan` elements; measuring only the parent `text.actor` reports the box fill and gives a misleading result. Inspector IDs remain attached after paper insertion. The seven browser cases passed, with minimum Sequence text contrast 13.55:1 and stroke contrast 3.76:1, State text contrast 12.63:1, and exact opaque viewBox coverage. This is renderer-level browser evidence; final installed native-panel checks remain with QA/coordinator after the package rebuild.
+
+## Verification
+
+Colocated tests exercise EPC alternation/connectors, typed C4 forms, cardinality direction, SVG escaping, inspector IDs, actor-lane references, BPMN DI, rule expressions and graph-driven alternatives. `src/notations/fixture.html` renders all six views for three samples and hostile labels in a real browser; `window.notationQA` records outcome, dimensions, glyphs and inspector map counts. Native sandbox/CSP/panzoom verification belongs to the independent QA fixture, rather than being inferred from this renderer fixture. All three lane-based sample XML files were validated with `xmllint` against the official [OMG BPMN schemas](https://www.omg.org/spec/BPMN/20100501/BPMN20.xsd).
