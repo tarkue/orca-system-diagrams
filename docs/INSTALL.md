@@ -1,38 +1,46 @@
-# Установка v0.3.0
+# Установка
 
-Проверено с Orca 1.4.218, Plugin API v1. Другие версии требуют отдельной проверки: [совместимость](COMPATIBILITY.md).
+Проверенный host: Orca1.4.218, Plugin API1. На более новых версиях нужна отдельная проверка совместимости.
 
-## Готовый ZIP
+## По Git URL — основной способ
 
-1. Скачайте `orca-system-diagrams-0.3.0.zip` и опубликованную SHA256-сумму из [релиза](https://github.com/tarkue/orca-system-diagrams/releases/tag/v0.3.0).
-2. Сверьте SHA256 архива и распакуйте его. Локальная сборка создаёт `releases/orca-system-diagrams-0.3.0.zip`.
-3. В Orca откройте Settings → Plugins → Install plugin → Local folder.
-4. Выберите внутреннюю папку `orca-system-diagrams/`, содержащую `orca-plugin.json` и `panel.html`, а не внешний каталог архива.
-5. Проверьте запрос: только `workspace:read`, без worker. Подтвердите установку, включите расширение и откройте «Схемы системы» в боковой панели.
+1. Откройте Settings → Plugins → Install plugin в Orca и выберите установку из Git.
+2. Вставьте ссылку:
 
-Содержимое архива:
+   https://github.com/tarkue/orca-system-diagrams
 
-```text
-INSTALL.md
-LICENSE
-orca-system-diagrams/
-  orca-plugin.json
-  panel.html
-  THIRD_PARTY_NOTICES.md
-  bundle-meta.json
-  SHA256SUMS
-```
+3. Установите плагин, проверьте единственное разрешение workspace:read и отсутствие фонового worker, затем включите.
+4. Откройте «Схемы системы» в правой боковой панели.
 
-`SHA256SUMS` внутри пакета проверяет файлы пакета; опубликованная сумма ZIP проверяет сам архив. Для установки готового пакета Node.js не нужен. Панель не требует отдельного сервера.
+В корне репозитория лежит orca-plugin.json, ссылающийся на готовый plugin/panel.html. Orca клонирует репозиторий и использует собранный файл; запуск npm при установке не нужен. Для фиксации релиза host поддерживает Git reference:
 
-## Обновление
+https://github.com/tarkue/orca-system-diagrams#v0.3.0
 
-Скачайте новый ZIP, проверьте сумму и повторите установку внутренней папки через штатный интерфейс. Обычная установка копирует пакет: редактирование исходной папки не обновляет установленную копию. Идентичность расширения сохраняется: `local-diagram.diagram-ide`.
+Установка по Git и её обновление сохраняют встроенную проверку и согласование разрешений Orca.
 
-## Разработка и своя модель
+## ZIP — запасной способ
 
-Клонируйте [репозиторий](https://github.com/tarkue/orca-system-diagrams), выполните `npm ci`, отредактируйте `orca-plugin/model.json`, затем выполните `npm run build`. В Settings → Plugins → Development добавьте **`orca-plugin/package`** как Development plugin folder и включите расширение. Orca следит за собранным development-пакетом; после следующей успешной сборки панель перезагружается.
+Скачайте [релиз v0.3.0](https://github.com/tarkue/orca-system-diagrams/releases/tag/v0.3.0) или ZIP с [лендинга](https://tarkue.github.io/orca-system-diagrams/). Распакуйте архив. Через Settings → Plugins → Install plugin → Local folder выберите внутреннюю папку orca-system-diagrams, содержащую orca-plugin.json. Проверьте разрешения и включите плагин.
 
-Изменение JSON без сборки не обновляет панель. При ошибке модели исправьте данные и повторите сборку; не считайте предыдущую отображаемую модель новой. Development-путь должен указывать на пакет с manifest и HTML, а не на родительский `orca-plugin`.
+Рядом с ZIP опубликован файл .sha256. Проверяйте checksum скачанного архива перед установкой; внутри папки плагина есть SHA256SUMS для четырёх файлов.
 
-Если панель не появилась, проверьте версию host, выбранную папку, включение расширения и сообщения проверки пакета. Для локального пакета выполните `npm run verify:plugin`; эта переносимая проверка не доказывает успешный нативный рендер. См. [работу с агентом](AGENT-WORKFLOW.md).
+## Модель своего проекта и живые обновления
+
+Для разработки нужны Node.js22.12+ и npm:
+
+~~~sh
+git clone https://github.com/tarkue/orca-system-diagrams.git
+cd orca-system-diagrams
+npm ci
+npm run build
+~~~
+
+Подключите orca-plugin/package в Settings → Plugins → Development → Development plugin folder path → Add path. Агент меняет orca-plugin/model.json и запускает npm run build. После успешной сборки development watcher Orca подхватывает новую панель.
+
+Обычная Git/ZIP-установка — зафиксированный снимок. Она не следит за вашим рабочим JSON. Для обновления из исходников используйте development-папку или установите обновлённый пакет штатным способом.
+
+Панель не сканирует репозиторий автоматически и не определяет другой файл при переключении workspace. Подробнее: [работа с агентом](AGENT-WORKFLOW.md), [модель](MODEL.md), [совместимость](COMPATIBILITY.md).
+
+## Подготовка Git-установки для своего релиза
+
+После изменений исходников выполните npm run prepare:git-install и закоммитьте обновлённые корневой manifest и plugin/. CI заново строит панель и проверяет, что committed bundle совпадает с исходниками. Не редактируйте собранный HTML вручную.

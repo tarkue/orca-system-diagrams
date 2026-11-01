@@ -22,8 +22,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - run: node scripts/verify-git-install.mjs
       - run: npm ci
       - run: npm run package:plugin
+      - run: node scripts/build-git-plugin.mjs --check
       - run: npm run build:site
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5

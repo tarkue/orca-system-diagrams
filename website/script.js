@@ -24,3 +24,21 @@ for (const tab of tabs) {
     nextTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   });
 }
+
+const copyGitButton = document.getElementById('copy-git-url');
+copyGitButton.addEventListener('click', async () => {
+  const code = document.getElementById('git-install-url');
+  const status = document.getElementById('copy-git-status');
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+    await navigator.clipboard.writeText(code.textContent.trim());
+    status.textContent = 'Ссылка скопирована. Вставьте её в Orca → Plugins → Install plugin.';
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(code);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    status.textContent = 'Ссылка выделена — скопируйте её через Ctrl/Cmd + C.';
+  }
+});

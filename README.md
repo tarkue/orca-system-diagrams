@@ -8,7 +8,13 @@ Native Orca plugin: six diagram views from one validated system model.
 
 ## Установка
 
-Скачайте `orca-system-diagrams-0.3.0.zip` из [релиза v0.3.0](https://github.com/tarkue/orca-system-diagrams/releases/tag/v0.3.0), распакуйте и выберите **внутреннюю папку `orca-system-diagrams/`** через Settings → Plugins → Install plugin → Local folder. Проверьте разрешение `workspace:read` и отсутствие worker, включите расширение и откройте «Схемы системы» в боковой панели. Подробности и обновление — в [инструкции](docs/INSTALL.md).
+В Orca откройте Settings → Plugins → Install plugin, выберите Git и вставьте:
+
+~~~text
+https://github.com/tarkue/orca-system-diagrams
+~~~
+
+Проверьте workspace:read и отсутствие фонового worker, включите плагин и откройте «Схемы системы» в боковой панели. Готовый bundle включён в репозиторий — npm для установки не нужен. [ZIP релиза](https://github.com/tarkue/orca-system-diagrams/releases/tag/v0.3.0) остаётся запасным способом. Подробности — в [инструкции](docs/INSTALL.md).
 
 Проверенная версия: **Orca 1.4.218, Plugin API v1**. Совместимость с более новыми версиями не предполагается автоматически: [ограничения](docs/COMPATIBILITY.md).
 

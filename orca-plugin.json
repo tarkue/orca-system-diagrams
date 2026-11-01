@@ -1,0 +1,27 @@
+{
+  "manifestVersion": 1,
+  "publisher": "local-diagram",
+  "id": "diagram-ide",
+  "name": "Схемы системы",
+  "version": "0.3.0",
+  "description": "Просмотр схем системы и исходной JSON-модели только для чтения внутри Orca.",
+  "engines": {
+    "orca": ">=1.4.218"
+  },
+  "pluginApi": 1,
+  "contributes": {
+    "panels": [
+      {
+        "id": "model",
+        "title": "Схемы системы",
+        "icon": "Workflow",
+        "entry": "plugin/panel.html"
+      }
+    ]
+  },
+  "capabilities": [
+    {
+      "kind": "workspace:read"
+    }
+  ]
+}

@@ -12,7 +12,8 @@
     "package:plugin": "npm run build && node scripts/package-plugin.mjs",
     "verify:plugin": "node scripts/verify-plugin.mjs",
     "build:site": "node scripts/build-site.mjs",
-    "check:publication": "node scripts/check-publication.mjs"
+    "check:publication": "node scripts/check-publication.mjs",
+    "prepare:git-install": "npm run build && node scripts/build-git-plugin.mjs"
   },
   "dependencies": {
     "bpmn-js": "^18.31.1",

@@ -14,10 +14,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - run: node scripts/verify-git-install.mjs
       - run: npm ci
       - run: npm test
       - run: npm run test:bridge
       - run: npm run check:publication
       - run: npm run package:plugin
+      - run: node scripts/build-git-plugin.mjs --check
       - run: npm run verify:plugin
       - run: npm run build:site

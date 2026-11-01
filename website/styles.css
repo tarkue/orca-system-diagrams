@@ -4,3 +4,11 @@
 .example-label:hover{text-decoration:underline;text-underline-offset:4px}
 @media(max-width:900px){.gallery-caption .example-label{display:inline-flex;grid-column:2;justify-self:start}}
 @media(max-width:620px){.gallery-caption .example-label{grid-column:1}}
+
+.git-install{margin-top:45px;padding:28px;border:1px solid var(--line);border-radius:16px;background:#f8f8fa}
+.git-install .eyebrow{margin-bottom:15px;font-size:10px}
+.git-install-row{display:flex;gap:22px;align-items:center;justify-content:space-between}
+.git-install-row code{font:14px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;color:#343438;overflow-wrap:anywhere}
+.git-install-row button{flex-shrink:0;border:0;cursor:pointer}
+.git-install-status{margin:16px 0 0;color:#77777f;font-size:12px;line-height:1.7;min-height:21px}
+@media(max-width:620px){.git-install{padding:20px;margin-top:30px}.git-install-row{align-items:stretch;flex-direction:column;gap:18px}.git-install-row code{font-size:12px}.git-install-row button{justify-content:center}.git-install-status{font-size:11px}}
